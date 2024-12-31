@@ -33,9 +33,10 @@ const BoardIdLayout = async ({
   params,
 }: {
   children: React.ReactNode;
-  params: { boardId: string };
+  params: { boardId: string; };
 }) => {
   const { orgId } = await auth();
+  const boardId = await params.boardId;
 
   if (!orgId) {
     redirect("/select-org");
@@ -43,7 +44,7 @@ const BoardIdLayout = async ({
 
   const board = await db.board.findUnique({
     where: {
-      id: params.boardId,
+      id: boardId,
       orgId,
     },
   });
