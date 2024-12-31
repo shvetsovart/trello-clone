@@ -3,10 +3,12 @@ import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import { BoardNavbar } from "./_components/board-navbar";
 
+type Params = Promise<{ boardId: string }>;
+
 export async function generateMetadata({
   params,
 }: {
-  params: { boardId: string };
+  params: Params;
 }) {
   const { orgId } = await auth();
 
@@ -18,7 +20,7 @@ export async function generateMetadata({
 
   const board = await db.board.findUnique({
     where: {
-      id: params.boardId,
+      id: (await params).boardId,
       orgId,
     },
   });
@@ -28,8 +30,6 @@ export async function generateMetadata({
   };
 }
 
-type Params = Promise<{ boardId: string }>;
-
 const BoardIdLayout = async ({
   children,
   params,
@@ -38,7 +38,6 @@ const BoardIdLayout = async ({
   params: Params;
 }) => {
   const { orgId } = await auth();
-  const awaitedParams = await params;
 
   if (!orgId) {
     redirect("/select-org");
@@ -46,7 +45,7 @@ const BoardIdLayout = async ({
 
   const board = await db.board.findUnique({
     where: {
-      id: awaitedParams.boardId,
+      id: (await params).boardId,
       orgId,
     },
   });
