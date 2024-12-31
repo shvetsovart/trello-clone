@@ -8,18 +8,18 @@ export async function generateMetadata({
 }: {
   params: { boardId: string };
 }) {
-  const {orgId} = await auth();
+  const { orgId } = await auth();
 
   if (!orgId) {
     return {
       title: "Board",
-    }
+    };
   }
 
   const board = await db.board.findUnique({
     where: {
       id: params.boardId,
-      orgId
+      orgId,
     },
   });
 
@@ -28,15 +28,17 @@ export async function generateMetadata({
   };
 }
 
+type Params = Promise<{ boardId: string }>;
+
 const BoardIdLayout = async ({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { boardId: string; };
+  params: Params;
 }) => {
   const { orgId } = await auth();
-  const boardId = await params.boardId;
+  const awaitedParams = await params;
 
   if (!orgId) {
     redirect("/select-org");
@@ -44,7 +46,7 @@ const BoardIdLayout = async ({
 
   const board = await db.board.findUnique({
     where: {
-      id: boardId,
+      id: awaitedParams.boardId,
       orgId,
     },
   });
@@ -58,8 +60,8 @@ const BoardIdLayout = async ({
       className="relative h-full bg-no-repeat bg-cover bg-center"
       style={{ backgroundImage: `url(${board.imageFullUrl})` }}
     >
-      <BoardNavbar data={board}/>
-      <div className="absolute inset-0 bg-black/10"/>
+      <BoardNavbar data={board} />
+      <div className="absolute inset-0 bg-black/10" />
       <main className="relative pt-28 h-full">{children}</main>
     </div>
   );
